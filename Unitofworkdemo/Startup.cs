@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Unitofworkdemo.Data;
+using Unitofworkdemo.Helpers;
 using Unitofworkdemo.Interfaces;
 
 namespace Unitofworkdemo
@@ -31,6 +32,7 @@ namespace Unitofworkdemo
         {
 
             services.AddControllers();
+            services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             services.AddScoped<IUnitOfWork,UnitOfWork>();
             services.AddDbContext<DataContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DbConn")));
             services.AddSwaggerGen(c =>
