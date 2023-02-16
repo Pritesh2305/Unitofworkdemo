@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -48,6 +49,10 @@ namespace Unitofworkdemo.Controllers
         [HttpPost("post")]
         public async Task<IActionResult> AddCity(CityDto citydto)
         {
+
+            //if (!ModelState.IsValid)
+            //    return BadRequest(ModelState);
+
             var city = mapper.Map<City>(citydto);            
 
             uow.CityRepository.AddCity(city);
@@ -61,6 +66,67 @@ namespace Unitofworkdemo.Controllers
             uow.CityRepository.DeleteCity(id);
             await uow.SaveAsync();
             return Ok(id);
+        }
+
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateCity(Int64 id,CityDto citydto)
+        {
+            try
+            {
+                if (id != citydto.id)
+                    return BadRequest("Update not Allowed.");
+
+                var cityfromdb = await uow.CityRepository.FindCity(id);
+
+                if (cityfromdb == null)
+                    return BadRequest("Update not Allowed.");
+
+                mapper.Map(citydto, cityfromdb);
+                await uow.SaveAsync();
+                return StatusCode(200);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500,ex.Message.ToString());
+            }
+        }
+
+        [HttpPatch("update/{id}")]
+        public async Task<IActionResult> UpdateCityPatch(Int64 id,JsonPatchDocument<City> citytopatch)
+        {
+            // JSON PASS THIS WAY   
+            //[ 
+            //{
+            //"operationType": 0,
+            //"path": "cityname",
+            //"op": "replace",    
+            //"value" :"pritesh"
+            //}
+            //]
+
+            // MULTIPAL JSON PASS THIS WAY   
+            //[ 
+            //{
+            //"operationType": 0,
+            //"path": "cityname",
+            //"op": "replace",    
+            //"value" :"pritesh"
+            //},
+            //{
+            //"operationType": 0,
+            //"path": "country",
+            //"op": "replace",    
+            //"value" :"USA"
+            //}
+            //]
+
+
+
+            var cityfromdb = await uow.CityRepository.FindCity(id);
+            citytopatch.ApplyTo(cityfromdb, ModelState);
+            //mapper.Map(citydto, cityfromdb);
+            await uow.SaveAsync();
+            return StatusCode(200);
         }
 
     }

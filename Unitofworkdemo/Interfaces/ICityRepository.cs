@@ -10,6 +10,8 @@ namespace Unitofworkdemo.Interfaces
     {
         Task<IEnumerable<City>> GetCitiesAsync();
         void AddCity(City city);
-        void DeleteCity(int cityid);        
+        void DeleteCity(int cityid);
+        Task<City> FindCity(Int64 id);
+        
     }
 }
